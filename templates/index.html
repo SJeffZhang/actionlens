@@ -3,286 +3,581 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screenshot to Task Tool</title>
+    <title>ActionLens Demo</title>
     <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0b1020;
+            --panel: #121933;
+            --panel-alt: #182248;
+            --border: #2c3565;
+            --text: #eef2ff;
+            --muted: #9aa6d1;
+            --primary: #8b7dff;
+            --primary-strong: #6f5dff;
+            --success: #2dd4bf;
+            --warning: #fbbf24;
+            --danger: #fb7185;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            background: #0f0f0f;
-            color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            margin: 0;
+            font-family: Inter, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(111, 93, 255, 0.18), transparent 30%),
+                linear-gradient(180deg, #060913 0%, var(--bg) 100%);
+            color: var(--text);
         }
 
-        .container {
-            width: 100%;
-            max-width: 700px;
+        .page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 40px auto 56px;
+        }
+
+        .hero {
+            margin-bottom: 28px;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(139, 125, 255, 0.15);
+            color: #c9c1ff;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
 
         h1 {
-            font-size: 2rem;
-            margin-bottom: 8px;
-            color: #a78bfa;
+            margin: 14px 0 10px;
+            font-size: clamp(32px, 5vw, 48px);
+            line-height: 1.05;
         }
 
-        p.subtitle {
-            color: #888;
-            margin-bottom: 32px;
+        .hero p {
+            margin: 0;
+            max-width: 760px;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.7;
         }
 
-        /* ── Upload Box ── */
-        .upload-box {
-            border: 2px dashed #333;
-            border-radius: 16px;
-            padding: 40px;
+        .grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: rgba(18, 25, 51, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+        }
+
+        .panel h2,
+        .panel h3 {
+            margin: 0 0 12px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .dropzone {
+            border: 1.5px dashed #44508f;
+            border-radius: 20px;
+            padding: 24px;
             text-align: center;
+            background: rgba(24, 34, 72, 0.6);
+            transition: border-color 0.2s ease, transform 0.2s ease;
             cursor: pointer;
-            transition: border-color 0.3s;
-            margin-bottom: 16px;
         }
 
-        .upload-box:hover {
-            border-color: #a78bfa;
+        .dropzone:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
         }
 
-        .upload-box input[type="file"] {
+        .dropzone strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .dropzone span,
+        .hint,
+        .meta,
+        .empty {
+            color: var(--muted);
+        }
+
+        input[type="file"] {
             display: none;
         }
 
-        .upload-box label {
-            cursor: pointer;
-            font-size: 1rem;
-            color: #888;
-        }
-
-        .upload-box label span {
-            color: #a78bfa;
-            font-weight: bold;
-        }
-
-        /* ── Preview Image ── */
-        #preview {
+        textarea {
             width: 100%;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            display: none;
+            min-height: 140px;
+            resize: vertical;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: rgba(7, 11, 27, 0.8);
+            color: var(--text);
+            padding: 14px 16px;
+            font: inherit;
+            line-height: 1.6;
         }
 
-        /* ── Button ── */
+        .button-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
         button {
-            width: 100%;
-            padding: 14px;
-            background: #a78bfa;
-            color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
+            border-radius: 14px;
+            padding: 13px 18px;
+            font: inherit;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-bottom: 24px;
+            transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
         }
 
-        button:hover {
-            background: #7c3aed;
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
         }
 
         button:disabled {
-            background: #444;
+            opacity: 0.55;
             cursor: not-allowed;
         }
 
-        /* ── Results ── */
-        #results {
-            display: none;
+        .primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+            color: white;
         }
 
-        .task-list {
-            background: #1a1a1a;
-            border-radius: 16px;
-            padding: 24px;
+        .secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
         }
 
-        .task-list h2 {
-            font-size: 1.2rem;
-            margin-bottom: 16px;
-            color: #a78bfa;
+        .status {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 8px;
         }
 
-        .task-item {
+        .badge-row {
             display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #222;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
-        .task-item:last-child {
-            border-bottom: none;
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
         }
 
-        .task-item input[type="checkbox"] {
-            margin-top: 3px;
-            accent-color: #a78bfa;
-            width: 16px;
-            height: 16px;
-            flex-shrink: 0;
+        .badge.success {
+            background: rgba(45, 212, 191, 0.16);
+            color: #9bf3e2;
         }
 
-        .task-item label {
-            font-size: 0.95rem;
-            color: #ddd;
-            line-height: 1.5;
+        .badge.warning {
+            background: rgba(251, 191, 36, 0.16);
+            color: #fde68a;
         }
 
-        .no-tasks {
-            color: #888;
-            font-size: 0.9rem;
+        .badge.danger {
+            background: rgba(251, 113, 133, 0.16);
+            color: #fecdd3;
         }
 
-        /* ── Loading ── */
-        #loading {
+        .preview {
+            width: 100%;
             display: none;
-            text-align: center;
-            color: #888;
-            margin-bottom: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: #05070f;
         }
 
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #333;
-            border-top-color: #a78bfa;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
+        .card {
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: start;
+            margin-bottom: 14px;
+        }
+
+        .result-header h2 {
+            margin-bottom: 6px;
+        }
+
+        .muted-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .item-list,
+        .history-list,
+        .signal-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .item {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(7, 11, 27, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .item strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .kv {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.65;
+            color: #dbe4ff;
+        }
+
+        .error-box {
+            display: none;
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(251, 113, 133, 0.14);
+            border: 1px solid rgba(251, 113, 133, 0.35);
+            color: #ffe4ea;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Screenshot to Task Tool ✦</h1>
-        <p class="subtitle">Upload any screenshot — AI will extract actionable tasks instantly.</p>
+    <div class="page">
+        <section class="hero">
+            <span class="eyebrow">ActionLens Demo</span>
+            <h1>Screenshot to reminder-ready JSON</h1>
+            <p>
+                This first demo keeps the original upload flow, then upgrades it with a stricter
+                interpretation layer, schema validation, failure history, and a reset budget of
+                {{ max_resets }} tries. Model backend: <strong>{{ deepseek_model }}</strong>.
+            </p>
+        </section>
 
-        <!-- Upload Area -->
-        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
-            <label>
-                Click to upload a screenshot or drag & drop<br>
-                <span>PNG, JPG, JPEG supported</span>
-            </label>
-        </div>
+        <section class="grid">
+            <div class="panel stack">
+                <div class="status">
+                    <div class="badge-row">
+                        {% if deepseek_configured %}
+                        <span class="badge success">DeepSeek configured</span>
+                        {% else %}
+                        <span class="badge warning">DeepSeek required</span>
+                        {% endif %}
+                        <span class="badge">Max resets: {{ max_resets }}</span>
+                        <span class="badge">Route: upload -> vision model -> validation/reset</span>
+                    </div>
+                    <div class="hint">
+                        {% if deepseek_configured %}
+                        Upload a screenshot for full analysis. The model reads the image directly and returns structured JSON.
+                        {% else %}
+                        This demo now requires <code>DEEPSEEK_API_KEY</code> because the flow uses direct visual understanding.
+                        {% endif %}
+                    </div>
+                </div>
 
-        <!-- Image Preview -->
-        <img id="preview" alt="Preview">
+                <label class="dropzone" for="fileInput">
+                    <strong>Upload a screenshot</strong>
+                    <span>PNG, JPG, JPEG, GIF, and WebP are supported for the demo.</span>
+                    <input type="file" id="fileInput" accept="image/*">
+                </label>
 
-        <!-- Extract Button -->
-        <button id="extractBtn" onclick="extractTasks()" disabled>
-            Extract Tasks with AI
-        </button>
+                <img id="preview" class="preview" alt="Screenshot preview">
 
-        <!-- Loading Spinner -->
-        <div id="loading">
-            <span class="spinner"></span> AI is reading your screenshot...
-        </div>
+                <div class="button-row">
+                    <button id="analyzeButton" class="primary">Analyze Screenshot</button>
+                    <button id="resetButton" class="secondary">Reset Form</button>
+                </div>
 
-        <!-- Results -->
-        <div id="results">
-            <div class="task-list">
-                <h2>📋 Extracted Tasks</h2>
-                <div id="taskItems"></div>
+                <div id="loading" class="hint" style="display: none;">
+                    Reading the image with the vision model, validating the JSON output, and retrying if needed...
+                </div>
+                <div id="errorBox" class="error-box"></div>
+
+                <div class="footer-note">
+                    The demo does not write to Apple Reminders yet. It focuses on the hardest part first:
+                    direct image understanding, stable reminder-ready output, explanation, and reset logic.
+                </div>
             </div>
-        </div>
+
+            <div class="panel stack">
+                <div class="result-header">
+                    <div>
+                        <h2>Structured Result</h2>
+                        <div id="resultSummary" class="meta">No analysis yet.</div>
+                    </div>
+                    <div id="resultBadges" class="badge-row"></div>
+                </div>
+
+                <div id="emptyState" class="empty">
+                    Upload a screenshot to generate the first demo result.
+                </div>
+
+                <div id="resultContent" class="stack" style="display: none;">
+                    <div class="card">
+                        <span class="muted-label">Title</span>
+                        <div id="titleValue"></div>
+                    </div>
+
+                    <div class="card">
+                        <span class="muted-label">Summary</span>
+                        <div id="summaryValue"></div>
+                    </div>
+
+                    <div class="card">
+                        <span class="muted-label">Explanation</span>
+                        <div id="reasoningValue"></div>
+                        <div id="signalList" class="signal-list" style="margin-top: 12px;"></div>
+                    </div>
+
+                    <div class="card">
+                        <span class="muted-label">Reminder-ready items</span>
+                        <div id="itemList" class="item-list"></div>
+                    </div>
+
+                    <div class="card">
+                        <span class="muted-label">Failure history / resets</span>
+                        <div id="historyList" class="history-list"></div>
+                    </div>
+
+                    <div class="card">
+                        <span class="muted-label">Visible text extracted by the vision model</span>
+                        <pre id="rawTextValue"></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script>
-        // ── Show image preview when user selects a file ──
-        // Why? Good UX — user should see what they uploaded
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        const preview = document.getElementById("preview");
+        const fileInput = document.getElementById("fileInput");
+        const analyzeButton = document.getElementById("analyzeButton");
+        const resetButton = document.getElementById("resetButton");
+        const loading = document.getElementById("loading");
+        const errorBox = document.getElementById("errorBox");
+        const emptyState = document.getElementById("emptyState");
+        const resultContent = document.getElementById("resultContent");
+        const resultSummary = document.getElementById("resultSummary");
+        const resultBadges = document.getElementById("resultBadges");
+        const titleValue = document.getElementById("titleValue");
+        const summaryValue = document.getElementById("summaryValue");
+        const reasoningValue = document.getElementById("reasoningValue");
+        const signalList = document.getElementById("signalList");
+        const itemList = document.getElementById("itemList");
+        const historyList = document.getElementById("historyList");
+        const rawTextValue = document.getElementById("rawTextValue");
 
-            const preview = document.getElementById("preview");
+        fileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                preview.style.display = "none";
+                preview.removeAttribute("src");
+                return;
+            }
+
             preview.src = URL.createObjectURL(file);
             preview.style.display = "block";
+            errorBox.style.display = "none";
+        });
 
-            // Enable the button only after a file is selected
-            document.getElementById("extractBtn").disabled = false;
-        }
+        resetButton.addEventListener("click", () => {
+            fileInput.value = "";
+            preview.removeAttribute("src");
+            preview.style.display = "none";
+            errorBox.style.display = "none";
+            emptyState.style.display = "block";
+            resultContent.style.display = "none";
+            resultSummary.textContent = "No analysis yet.";
+            resultBadges.innerHTML = "";
+        });
 
-        // ── Send image to Flask backend ──
-        async function extractTasks() {
-            const fileInput = document.getElementById("fileInput");
-            const file = fileInput.files[0];
-            if (!file) return;
+        analyzeButton.addEventListener("click", async () => {
+            errorBox.style.display = "none";
+            loading.style.display = "block";
+            analyzeButton.disabled = true;
 
-            // Show loading, hide results
-            document.getElementById("loading").style.display = "block";
-            document.getElementById("results").style.display = "none";
-            document.getElementById("extractBtn").disabled = true;
-
-            // Why FormData? It's the standard way to send files
-            // over HTTP from a browser to a server
             const formData = new FormData();
-            formData.append("screenshot", file);
+            const file = fileInput.files[0];
+            if (file) {
+                formData.append("screenshot", file);
+            }
 
             try {
-                const response = await fetch("/upload", {
+                const response = await fetch("/analyze", {
                     method: "POST",
                     body: formData
                 });
-
                 const data = await response.json();
 
-                // Hide loading
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("extractBtn").disabled = false;
+                if (!response.ok) {
+                    throw new Error(data.error || "Analysis failed.");
+                }
 
-                // Display tasks
-                displayTasks(data.tasks);
-
+                renderResult(data);
             } catch (error) {
-                document.getElementById("loading").style.display = "none";
-                document.getElementById("extractBtn").disabled = false;
-                alert("Something went wrong. Please try again.");
+                errorBox.textContent = error.message;
+                errorBox.style.display = "block";
+            } finally {
+                loading.style.display = "none";
+                analyzeButton.disabled = false;
             }
+        });
+
+        function badgeClass(condition) {
+            if (condition === "success") return "badge success";
+            if (condition === "warning") return "badge warning";
+            if (condition === "danger") return "badge danger";
+            return "badge";
         }
 
-        // ── Render tasks as checkboxes ──
-        function displayTasks(tasks) {
-            const container = document.getElementById("taskItems");
-            const results = document.getElementById("results");
+        function renderResult(data) {
+            emptyState.style.display = "none";
+            resultContent.style.display = "grid";
+            resultSummary.textContent = `Type: ${data.content_type} | Confidence: ${data.confidence}`;
 
-            container.innerHTML = "";
+            resultBadges.innerHTML = "";
+            resultBadges.appendChild(buildBadge(data.analysis_meta.mode, "success"));
+            resultBadges.appendChild(buildBadge(`Source: ${data.analysis_source || "unknown"}`));
+            resultBadges.appendChild(buildBadge(`Vision: ${data.vision_model || "unknown"}`));
+            resultBadges.appendChild(buildBadge(`Attempts: ${data.analysis_meta.attempts_used}`));
+            resultBadges.appendChild(buildBadge(`Resets: ${data.analysis_meta.reset_count}`));
+            resultBadges.appendChild(
+                buildBadge(
+                    data.needs_review ? "Needs review" : "Ready for confirmation",
+                    data.needs_review ? "warning" : "success"
+                )
+            );
 
-            if (!tasks || tasks.length === 0) {
-                container.innerHTML = '<p class="no-tasks">No tasks found in this screenshot.</p>';
+            titleValue.textContent = data.title;
+            summaryValue.textContent = data.summary;
+            reasoningValue.textContent = data.explanation.reasoning_summary;
+
+            signalList.innerHTML = "";
+            (data.explanation.key_signals || []).forEach((signal) => {
+                const node = document.createElement("div");
+                node.className = "badge";
+                node.textContent = signal;
+                signalList.appendChild(node);
+            });
+
+            itemList.innerHTML = "";
+            if (!data.items.length) {
+                itemList.innerHTML = `<div class="empty">No reminder-ready items survived validation. This is a valid demo outcome when the parser decides it cannot trust the result.</div>`;
             } else {
-                tasks.forEach((task, index) => {
-                    container.innerHTML += `
-                        <div class="task-item">
-                            <input type="checkbox" id="task${index}">
-                            <label for="task${index}">${task}</label>
+                data.items.forEach((item) => {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "item";
+                    wrapper.innerHTML = `
+                        <strong>${escapeHtml(item.title)}</strong>
+                        <div class="kv">
+                            <span>kind: ${escapeHtml(item.kind)}</span>
+                            <span>priority: ${escapeHtml(item.priority)}</span>
+                            <span>due: ${escapeHtml(item.due_date || "none")}</span>
                         </div>
+                        <div class="meta">${escapeHtml(item.notes || "")}</div>
+                        <pre>${escapeHtml(item.source_span || "")}</pre>
                     `;
+                    itemList.appendChild(wrapper);
                 });
             }
 
-            results.style.display = "block";
+            historyList.innerHTML = "";
+            if (!data.analysis_meta.failure_history.length) {
+                historyList.innerHTML = `<div class="empty">No resets were needed for this run.</div>`;
+            } else {
+                data.analysis_meta.failure_history.forEach((entry) => {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "item";
+                    wrapper.innerHTML = `
+                        <strong>Attempt ${entry.attempt}</strong>
+                        <pre>${escapeHtml((entry.errors || []).join("\n"))}</pre>
+                    `;
+                    historyList.appendChild(wrapper);
+                });
+            }
+
+            rawTextValue.textContent = data.raw_text || "";
+        }
+
+        function buildBadge(label, tone = "") {
+            const node = document.createElement("span");
+            node.className = badgeClass(tone);
+            node.textContent = label;
+            return node;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
         }
     </script>
 </body>
